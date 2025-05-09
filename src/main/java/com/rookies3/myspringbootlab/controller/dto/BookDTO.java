@@ -31,7 +31,8 @@ public class BookDTO {
         private Integer price;
         
         private LocalDate publishDate;
-        
+
+        //BookCreateRequest => Entity
         public Book toEntity() {
             Book book = new Book();
             book.setTitle(this.title);
@@ -68,7 +69,8 @@ public class BookDTO {
         private String isbn;
         private Integer price;
         private LocalDate publishDate;
-        
+
+        //Book => BookResponse
         public static BookResponse from(Book book) {
             return new BookResponse(
                 book.getId(),
