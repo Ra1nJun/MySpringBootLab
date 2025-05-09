@@ -24,8 +24,10 @@ public class Book {
     @Column(unique = true, nullable = false)
     private String isbn;
 
+    @Column(nullable = false)
     private Integer price;
 
+    @Column(nullable = false)
     private LocalDate publishDate;
 
 }
