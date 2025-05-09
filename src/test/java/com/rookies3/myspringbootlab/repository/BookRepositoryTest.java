@@ -4,7 +4,9 @@ import com.rookies3.myspringbootlab.entity.Book;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,7 +14,9 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
+@SpringBootTest
+@Transactional
+//@DataJpaTest
 public class BookRepositoryTest {
     
     @Autowired
@@ -48,8 +52,7 @@ public class BookRepositoryTest {
         book.setPrice(30000);
 
         bookRepository.save(book);
-        System.out.println(book);
-        
+
         // When
         Optional<Book> foundBook = bookRepository.findByIsbn("9788956746425");
         
@@ -82,9 +85,10 @@ public class BookRepositoryTest {
         book3.setPublishDate(LocalDate.of(2024, 7, 8));
         book3.setPrice(38000);
 
-        bookRepository.save(book1);
-        bookRepository.save(book2);
-        bookRepository.save(book3);
+//        bookRepository.save(book1);
+//        bookRepository.save(book2);
+//        bookRepository.save(book3);
+        bookRepository.saveAll(List.of(book1,book2,book3));
         
         // When
         List<Book> books = bookRepository.findByAuthor("홍길동");
