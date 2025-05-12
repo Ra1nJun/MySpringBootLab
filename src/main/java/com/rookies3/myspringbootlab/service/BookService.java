@@ -4,6 +4,7 @@ import com.rookies3.myspringbootlab.controller.dto.BookDTO;
 import com.rookies3.myspringbootlab.entity.Book;
 import com.rookies3.myspringbootlab.exception.BusinessException;
 import com.rookies3.myspringbootlab.repository.BookRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,9 @@ public class BookService {
     
     public List<BookDTO.BookResponse> getAllBooks() {
         return bookRepository.findAll().stream()
+                //.map(book -> BookDTO.BookResponse.from(book))
                 .map(BookDTO.BookResponse::from)
-                .collect(Collectors.toList());
+                .toList();  //Stream<BookResponse> => List<BookResponse>
     }
     
     public BookDTO.BookResponse getBookById(Long id) {
@@ -32,26 +34,29 @@ public class BookService {
     
     public BookDTO.BookResponse getBookByIsbn(String isbn) {
         Book book = bookRepository.findByIsbn(isbn)
-                .orElseThrow(() -> new BusinessException("Book Not Found with ISBN: " + isbn, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException("Book Not Found with ISBN: "
+                        + isbn, HttpStatus.NOT_FOUND));
         return BookDTO.BookResponse.from(book);
     }
     
     public List<BookDTO.BookResponse> getBooksByAuthor(String author) {
         return bookRepository.findByAuthor(author).stream()
                 .map(BookDTO.BookResponse::from)
-                .collect(Collectors.toList());
+                .toList();
     }
     
     @Transactional
     public BookDTO.BookResponse createBook(BookDTO.BookCreateRequest request) {
         // ISBN 중복 검사
-        bookRepository.findByIsbn(request.getIsbn())
+        bookRepository.findByIsbn(request.getIsbn()) //Optional<Book>
                 .ifPresent(book -> {
                     throw new BusinessException("Book with this ISBN already exists", HttpStatus.CONFLICT);
                 });
-                
+        // BookCreateRequest => Entity 변환
         Book book = request.toEntity();
+        // 등록 처리
         Book savedBook = bookRepository.save(book);
+        // Book => BookResponse 변환
         return BookDTO.BookResponse.from(savedBook);
     }
     
