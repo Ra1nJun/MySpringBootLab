@@ -5,8 +5,8 @@ import lombok.Getter;
 import lombok.ToString;
 
 @Getter
-@Builder
 @ToString
+@Builder
 public class MyEnvironment {
-    String mode;
+   	String mode;  	
 }

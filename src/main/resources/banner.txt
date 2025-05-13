@@ -6,5 +6,5 @@ $$ |  $$ |$$\   $$ |$$ |  $$ |$$ \$$$$ |      $$  __$$\ $$ |  $$ |$$ |  $$ |  $$
 $$ |  $$ |$$ |  $$ |$$ |  $$ |$$ |\$$$ |      $$ |  $$ |$$ |  $$ |$$ |  $$ |  $$ |
 \$$$$$$  |\$$$$$$  |\$$$$$$  |$$ | \$$ |      $$$$$$$  | $$$$$$  | $$$$$$  |  $$ |
  \______/  \______/  \______/ \__|  \__|      \_______/  \______/  \______/   \__|
- Application Info :: ${application.title} ${application.version}
- Powered by Spring Boot ${spring-boot.version}
+Application Info :: ${application.title} ${application.version}
+Powered by Spring Boot ${spring-boot.version}

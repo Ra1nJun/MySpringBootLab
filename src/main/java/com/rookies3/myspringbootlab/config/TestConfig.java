@@ -8,9 +8,10 @@ import org.springframework.context.annotation.Profile;
 @Profile("test")
 public class TestConfig {
     @Bean
-    public MyEnvironment myEnvironment(){
-        return MyEnvironment.builder()
-                .mode("개발환경")
-                .build();
+    public MyEnvironment myEnvironment() {
+        return MyEnvironment.builder() //MyEnvironmentBuilder
+                .mode("테스트환경")
+                .build(); //MyEnvironment
+
     }
 }

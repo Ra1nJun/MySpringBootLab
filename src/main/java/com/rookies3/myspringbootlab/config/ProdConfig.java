@@ -8,9 +8,10 @@ import org.springframework.context.annotation.Profile;
 @Profile("prod")
 public class ProdConfig {
     @Bean
-    public MyEnvironment myEnvironment(){
+    public MyEnvironment myEnvironment() {
         return MyEnvironment.builder()
                 .mode("운영환경")
                 .build();
+
     }
 }
