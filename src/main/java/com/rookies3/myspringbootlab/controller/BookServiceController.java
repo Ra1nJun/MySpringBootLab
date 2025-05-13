@@ -1,7 +1,6 @@
 package com.rookies3.myspringbootlab.controller;
 
 import com.rookies3.myspringbootlab.controller.dto.BookDTO;
-import com.rookies3.myspringbootlab.entity.Book;
 import com.rookies3.myspringbootlab.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +56,6 @@ public class BookServiceController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
-        return ResponseEntity.noContent().build();
+        return  ResponseEntity.noContent().build();
     }
 }
