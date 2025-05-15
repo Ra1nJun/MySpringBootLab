@@ -10,6 +10,9 @@ import java.time.LocalDate;
 @Table(name = "books")
 @Getter @Setter
 @DynamicUpdate
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Book {
     
     @Id
