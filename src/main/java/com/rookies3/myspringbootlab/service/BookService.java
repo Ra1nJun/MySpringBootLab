@@ -32,14 +32,14 @@ public class BookService {
     }
     
     public BookDTO.Response getBookById(Long id) {
-        Book book = findBookById(id);
+        Book book = bookRepository.findByIdWithBookDetail(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Book","id",id));
         return BookDTO.Response.fromEntity(book);
     }
     
     public BookDTO.Response getBookByIsbn(String isbn) {
-        Book book = bookRepository.findByIsbn(isbn)
-                .orElseThrow(() -> new BusinessException("Book Not Found with ISBN: "
-                        + isbn, HttpStatus.NOT_FOUND));
+        Book book = bookRepository.findByIsbnWithBookDetail(isbn)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,"Book","isbn",isbn));
         return BookDTO.Response.fromEntity(book);
     }
     
@@ -69,6 +69,7 @@ public class BookService {
                 .author(request.getAuthor())
                 .isbn(request.getIsbn())
                 .price(request.getPrice())
+                .publishDate(request.getPublishDate())
                 .build();
 
         // Create book detail if provided
@@ -80,6 +81,7 @@ public class BookService {
                     .publisher(request.getDetailRequest().getPublisher())
                     .coverImageUrl(request.getDetailRequest().getCoverImageUrl())
                     .edition(request.getDetailRequest().getEdition())
+                    .book(book)
                     .build();
 
             book.setBookDetail(bookDetail);
@@ -140,14 +142,8 @@ public class BookService {
     @Transactional
     public void deleteBook(Long id) {
         if (!bookRepository.existsById(id)) {
-            throw new BusinessException("Book Not Found with ID: " + id, HttpStatus.NOT_FOUND);
+            throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,"Book","id",id);
         }
         bookRepository.deleteById(id);
-    }
-    
-    // 내부 헬퍼 메서드
-    private Book findBookById(Long id) {
-        return bookRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Book Not Found with ID: " + id, HttpStatus.NOT_FOUND));
     }
 }

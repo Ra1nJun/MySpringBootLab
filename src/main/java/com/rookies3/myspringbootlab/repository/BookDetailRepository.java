@@ -13,8 +13,9 @@ import java.util.Optional;
 public interface BookDetailRepository extends JpaRepository<BookDetail, Long> {
     Optional<BookDetail> findByBookId(Long id);
 
-    @Query("SELECT sd FROM BookDetail sd JOIN FETCH sd.book WHERE sd.id = :id")
+    @Query("SELECT bd FROM BookDetail bd JOIN FETCH bd.book WHERE bd.id = :id")
     Optional<BookDetail> findByIdWithBook(@Param("id") Long id);
 
+    @Query("SELECT bd FROM BookDetail bd WHERE bd.publisher = :publisher")
     List<BookDetail> findByPublisher(String publisher);
 }

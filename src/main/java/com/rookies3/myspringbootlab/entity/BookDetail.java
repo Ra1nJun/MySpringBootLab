@@ -15,7 +15,7 @@ public class BookDetail {
     @Column(name = "book_detail_id")
     private Long id;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column
