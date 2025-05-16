@@ -1,6 +1,7 @@
 package com.rookies3.myspringbootlab.service;
 
 import com.rookies3.myspringbootlab.controller.dto.BookDTO;
+import com.rookies3.myspringbootlab.controller.dto.PartialBookDTO;
 import com.rookies3.myspringbootlab.entity.Book;
 import com.rookies3.myspringbootlab.entity.BookDetail;
 import com.rookies3.myspringbootlab.exception.BusinessException;
@@ -135,6 +136,86 @@ public class BookService {
         // Save and return updated book
         Book updatedBook = bookRepository.save(book);
         return BookDTO.Response.fromEntity(updatedBook);
+    }
+
+    @Transactional
+    public PartialBookDTO.Response partialUpdateBook(Long id, PartialBookDTO.PatchRequest request){
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                        "Book", "id", id));
+
+        if(request.getIsbn() != null){
+            if (!book.getIsbn().equals(request.getIsbn()) &&
+                    bookRepository.existsByIsbn(request.getIsbn())) {
+                throw new BusinessException(ErrorCode.ISBN_DUPLICATE,
+                        request.getIsbn());
+            }
+            book.setIsbn(request.getIsbn());
+        }
+
+        updateBookFieldsIfPresent(book, request);
+
+        if (request.getDetailRequest() != null) {
+            updateBookDetailIfPresent(book, request.getDetailRequest());
+        }
+
+        Book updatedBook = bookRepository.save(book);
+        return PartialBookDTO.Response.fromEntity(updatedBook);
+    }
+
+    private void updateBookFieldsIfPresent(Book book, PartialBookDTO.PatchRequest request) {
+        if (request.getTitle() != null) {
+            book.setTitle(request.getTitle());
+        }
+        if (request.getAuthor() != null) {
+            book.setAuthor(request.getAuthor());
+        }
+        if (request.getPrice() != null) {
+            book.setPrice(request.getPrice());
+        }
+        if (request.getPublishDate() != null) {
+            book.setPublishDate(request.getPublishDate());
+        }
+    }
+
+    @Transactional
+    public PartialBookDTO.Response partialUpdateBookDetail(Long id, PartialBookDTO.BookDetailPatchRequest detailRequest) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Book", "id", id));
+
+        updateBookDetailIfPresent(book, detailRequest);
+
+        Book updatedBook = bookRepository.save(book);
+        return PartialBookDTO.Response.fromEntity(updatedBook);
+    }
+
+    private void updateBookDetailIfPresent(Book book, PartialBookDTO.BookDetailPatchRequest detailRequest) {
+        BookDetail detail = book.getBookDetail();
+
+        if (detail == null) {
+            detail = new BookDetail();
+            detail.setBook(book);
+            book.setBookDetail(detail);
+        }
+
+        if (detailRequest.getDescription() != null) {
+            detail.setDescription(detailRequest.getDescription());
+        }
+        if (detailRequest.getLanguage() != null) {
+            detail.setLanguage(detailRequest.getLanguage());
+        }
+        if (detailRequest.getPageCount() != null) {
+            detail.setPageCount(detailRequest.getPageCount());
+        }
+        if (detailRequest.getPublisher() != null) {
+            detail.setPublisher(detailRequest.getPublisher());
+        }
+        if (detailRequest.getCoverImageUrl() != null) {
+            detail.setCoverImageUrl(detailRequest.getCoverImageUrl());
+        }
+        if (detailRequest.getEdition() != null) {
+            detail.setEdition(detailRequest.getEdition());
+        }
     }
 
     @Transactional
