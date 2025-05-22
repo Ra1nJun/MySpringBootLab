@@ -1,6 +1,7 @@
 package com.rookies3.myspringbootlab.service;
 
 import com.rookies3.myspringbootlab.controller.dto.BookDTO;
+import com.rookies3.myspringbootlab.controller.dto.PublisherDTO;
 import com.rookies3.myspringbootlab.entity.Book;
 import com.rookies3.myspringbootlab.entity.BookDetail;
 import com.rookies3.myspringbootlab.exception.BusinessException;
@@ -8,6 +9,7 @@ import com.rookies3.myspringbootlab.exception.ErrorCode;
 import com.rookies3.myspringbootlab.repository.BookDetailRepository;
 import com.rookies3.myspringbootlab.repository.BookRepository;
 
+import com.rookies3.myspringbootlab.repository.PublisherRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,7 @@ public class BookService {
     
     private final BookRepository bookRepository;
     private final BookDetailRepository bookDetailRepository;
+    private final PublisherRepository publisherRepository;
     
     public List<BookDTO.Response> getAllBooks() {
         return bookRepository.findAll().stream()
@@ -49,6 +52,18 @@ public class BookService {
 
     public List<BookDTO.Response> getBooksByTitle(String title) {
         return bookRepository.findByTitleContainingIgnoreCase(title).stream()
+                .map(BookDTO.Response::fromEntity)
+                .toList();
+    }
+
+    public List<BookDTO.Response> getBooksByPublisherId(Long publisherId) {
+        if (!publisherRepository.existsById(publisherId)) {
+            throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                    "Publisher", "id", publisherId);
+        }
+
+        return bookRepository.findByPublisherId(publisherId)
+                .stream()
                 .map(BookDTO.Response::fromEntity)
                 .toList();
     }

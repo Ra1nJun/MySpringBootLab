@@ -1,12 +1,13 @@
 package com.rookies3.myspringbootlab.repository;
 
 import com.rookies3.myspringbootlab.entity.Book;
+import com.rookies3.myspringbootlab.entity.BookDetail;
+import com.rookies3.myspringbootlab.entity.Publisher;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,127 +15,141 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@Transactional
-//@DataJpaTest
+@DataJpaTest
 public class BookRepositoryTest {
-    
+
+    @Autowired
+    private TestEntityManager entityManager;
+
     @Autowired
     private BookRepository bookRepository;
-    
-    @Test
-    public void testCreateBook() {
-        // Given
-        Book book = new Book();
-        book.setTitle("스프링 부트 입문");
-        book.setAuthor("홍길동");
-        book.setIsbn("9788956746425");
-        book.setPublishDate(LocalDate.of(2023, 1, 15));
-        book.setPrice(30000);
-        
-        // When
-        Book savedBook = bookRepository.save(book);
-        
-        // Then
-        assertThat(savedBook.getId()).isNotNull();
-        assertThat(savedBook.getTitle()).isEqualTo("스프링 부트 입문");
-        assertThat(savedBook.getAuthor()).isEqualTo("홍길동");
+
+    private Publisher publisher;
+    private Book book;
+    private BookDetail bookDetail;
+
+    @BeforeEach
+    void setUp() {
+        // Create publisher
+        publisher = Publisher.builder()
+                .name("Penguin Random House")
+                .establishedDate(LocalDate.of(2013, 7, 1))
+                .address("1745 Broadway, New York, NY")
+                .build();
+        entityManager.persistAndFlush(publisher);
+
+        // Create book
+        book = Book.builder()
+                .title("Clean Code")
+                .author("Robert C. Martin")
+                .isbn("978-0132350884")
+                .price(45000)
+                .publishDate(LocalDate.of(2008, 8, 1))
+                .publisher(publisher)
+                .build();
+        entityManager.persistAndFlush(book);
+
+        // Create book detail
+        bookDetail = BookDetail.builder()
+                .description("A handbook of agile software craftsmanship")
+                .language("English")
+                .pageCount(464)
+                .publisher("Prentice Hall")
+                .edition("1st Edition")
+                .book(book)
+                .build();
+        entityManager.persistAndFlush(bookDetail);
+
+        book.setBookDetail(bookDetail);
+        entityManager.persistAndFlush(book);
     }
-    
+
     @Test
-    public void testFindByIsbn() {
-        // Given
-        Book book = new Book();
-        book.setTitle("스프링 부트 입문");
-        book.setAuthor("홍길동");
-        book.setIsbn("9788956746425");
-        book.setPublishDate(LocalDate.of(2023, 1, 15));
-        book.setPrice(30000);
-
-        bookRepository.save(book);
-
+    void findByIsbn_ShouldReturnBook() {
         // When
-        Optional<Book> foundBook = bookRepository.findByIsbn("9788956746425");
-        
+        Optional<Book> found = bookRepository.findByIsbn("978-0132350884");
+
         // Then
-        assertThat(foundBook).isPresent();
-        assertThat(foundBook.get().getTitle()).isEqualTo("스프링 부트 입문");
+        assertThat(found).isPresent();
+        assertThat(found.get().getTitle()).isEqualTo("Clean Code");
+        assertThat(found.get().getAuthor()).isEqualTo("Robert C. Martin");
     }
-    
+
     @Test
-    public void testFindByAuthor() {
-        // Given
-        Book book1 = new Book();
-        book1.setTitle("스프링 부트 입문");
-        book1.setAuthor("홍길동");
-        book1.setIsbn("9788956746425");
-        book1.setPublishDate(LocalDate.of(2023, 1, 15));
-        book1.setPrice(30000);
-
-        Book book2 = new Book();
-        book2.setTitle("JPA 프로그래밍");
-        book2.setAuthor("박둘리");
-        book2.setIsbn("9788956746432");
-        book2.setPublishDate(LocalDate.of(2024, 3, 24));
-        book2.setPrice(35000);
-
-        Book book3 = new Book();
-        book3.setTitle("스프링 클라우드");
-        book3.setAuthor("홍길동");
-        book3.setIsbn("9788956746407");
-        book3.setPublishDate(LocalDate.of(2024, 7, 8));
-        book3.setPrice(38000);
-
-//        bookRepository.save(book1);
-//        bookRepository.save(book2);
-//        bookRepository.save(book3);
-        bookRepository.saveAll(List.of(book1,book2,book3));
-        
+    void findByIsbn_ShouldReturnEmpty_WhenNotFound() {
         // When
-        List<Book> books = bookRepository.findByAuthor("홍길동");
-        
+        Optional<Book> found = bookRepository.findByIsbn("000-0000000000");
+
         // Then
-        assertThat(books).hasSize(2);
-        assertThat(books).extracting("title").contains("스프링 부트 입문","스프링 클라우드");
+        assertThat(found).isEmpty();
     }
-    
-    @Test
-    @Rollback(value = false)
-    public void testUpdateBook() {
-        // Given
-        Book book = new Book();
-        book.setTitle("스프링 부트 입문1");
-        book.setAuthor("홍길동1");
-        book.setIsbn("9788956746426");
-        book.setPrice(30000);
-        Book savedBook = bookRepository.save(book);
-        
-        // When
-        savedBook.setPrice(32000);
-        //Book updatedBook = bookRepository.save(savedBook);
-        
-        // Then
-        //assertThat(updatedBook.getPrice()).isEqualTo(32000);
-        assertThat(savedBook.getPrice()).isEqualTo(32000);
-    }
-    
-    @Test
-    @Rollback(value = false)
-    public void testDeleteBook() {
-//        bookRepository.deleteAll();
 
-        // Given
-        Book book = new Book();
-        book.setTitle("스프링 부트 입문");
-        book.setAuthor("홍길동");
-        book.setIsbn("9788956746425");
-        book.setPrice(30000);
-        Book savedBook = bookRepository.save(book);
-        
+    @Test
+    void findByIdWithAllDetails_ShouldReturnBookWithAllDetails() {
         // When
-        bookRepository.deleteById(savedBook.getId());
-        
+        Optional<Book> found = bookRepository.findByIdWithBookDetails(book.getId());
+
         // Then
-        assertThat(bookRepository.findById(savedBook.getId())).isEmpty();
+        assertThat(found).isPresent();
+        assertThat(found.get().getBookDetail()).isNotNull();
+        assertThat(found.get().getPublisher()).isNotNull();
+        assertThat(found.get().getPublisher().getName()).isEqualTo("Penguin Random House");
+    }
+
+    @Test
+    void findByPublisherId_ShouldReturnBooks() {
+        // When
+        List<Book> found = bookRepository.findByPublisherId(publisher.getId());
+
+        // Then
+        assertThat(found).hasSize(1);
+        assertThat(found.get(0).getTitle()).isEqualTo("Clean Code");
+    }
+
+    @Test
+    void countByPublisherId_ShouldReturnCorrectCount() {
+        // When
+        Long count = bookRepository.countByPublisherId(publisher.getId());
+
+        // Then
+        assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    void existsByIsbn_ShouldReturnTrue() {
+        // When
+        boolean exists = bookRepository.existsByIsbn("978-0132350884");
+
+        // Then
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    void existsByIsbn_ShouldReturnFalse() {
+        // When
+        boolean exists = bookRepository.existsByIsbn("000-0000000000");
+
+        // Then
+        assertThat(exists).isFalse();
+    }
+
+    @Test
+    void findByAuthorContainingIgnoreCase_ShouldReturnBooks() {
+        // When
+        List<Book> found = bookRepository.findByAuthorContainingIgnoreCase("martin");
+
+        // Then
+        assertThat(found).hasSize(1);
+        assertThat(found.get(0).getAuthor()).contains("Martin");
+    }
+
+    @Test
+    void findByTitleContainingIgnoreCase_ShouldReturnBooks() {
+        // When
+        List<Book> found = bookRepository.findByTitleContainingIgnoreCase("clean");
+
+        // Then
+        assertThat(found).hasSize(1);
+        assertThat(found.get(0).getTitle()).contains("Clean");
     }
 }

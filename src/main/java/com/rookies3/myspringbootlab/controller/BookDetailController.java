@@ -1,7 +1,6 @@
 package com.rookies3.myspringbootlab.controller;
 
 import com.rookies3.myspringbootlab.controller.dto.BookDTO;
-import com.rookies3.myspringbootlab.entity.Book;
 import com.rookies3.myspringbootlab.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/books")
 @RequiredArgsConstructor
-public class BookController {
+public class BookDetailController {
     private final BookService bookService;
 
     @GetMapping
